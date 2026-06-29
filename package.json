@@ -3,6 +3,10 @@
   "version": "1.0.2",
   "description": "文字隐写工具 - 跨平台桌面版与 Android 安装版",
   "main": "main.js",
+  "author": {
+    "name": "小柏兔电商",
+    "email": "admin@example.com"
+  },
   "scripts": {
     "build": "npx cap copy android && cd android && ./gradlew assembleDebug",
     "android": "npx cap run android",
@@ -14,10 +18,6 @@
   "build": {
     "appId": "com.xbtds02.textencryptor",
     "productName": "文字隐写工具",
-    "author": {
-      "name": "小柏兔电商",
-      "email": "admin@example.com"
-    },
     "copyright": "© 2026 小柏兔电商",
     "directories": {
       "output": "dist-desktop"
