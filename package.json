@@ -7,13 +7,17 @@
     "build": "npx cap copy android && cd android && ./gradlew assembleDebug",
     "android": "npx cap run android",
     "electron:start": "electron .",
-    "electron:build": "electron-builder",
-    "electron:build:win": "electron-builder --win",
-    "electron:build:mac": "electron-builder --mac"
+    "electron:build": "electron-builder --publish never",
+    "electron:build:win": "electron-builder --win --publish never",
+    "electron:build:mac": "electron-builder --mac --publish never"
   },
   "build": {
     "appId": "com.xbtds02.textencryptor",
     "productName": "文字隐写工具",
+    "author": {
+      "name": "小柏兔电商",
+      "email": "admin@example.com"
+    },
     "copyright": "© 2026 小柏兔电商",
     "directories": {
       "output": "dist-desktop"
