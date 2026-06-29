@@ -71,14 +71,14 @@ jobs:
       - name: Rename APK
         run: |
           mkdir -p release
-          cp android/app/build/outputs/apk/debug/app-debug.apk release/文字隐写工具-v1.0.0.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk release/text-encryptor-v1.0.0.apk
 
       - name: Upload APK to Release
         uses: softprops/action-gh-release@v2
         with:
           files: release/*.apk
-          tag_name: v1.0.0
-          name: 文字隐写工具 Android APK v1.0.0
+          tag_name: v1.0.1
+          name: 文字隐写工具 Android APK v1.0.1
           body: |
             文字隐写工具 Android 安装包
             - 基于 Capacitor WebView 打包
