@@ -1,0 +1,101 @@
+name: Build Desktop Apps
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-win:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Windows installer & portable
+        run: npm run electron:build:win
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-dist
+          path: dist-desktop/*
+          if-no-files-found: error
+
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build macOS dmg & zip
+        run: npm run electron:build:mac
+        env:
+          # 禁用 macOS 代码签名，使用未签名构建
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dist
+          path: dist-desktop/*
+          if-no-files-found: error
+
+  release:
+    needs: [build-win, build-mac]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-dist
+          path: release/win
+
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-dist
+          path: release/mac
+
+      - name: Collect release files
+        run: |
+          mkdir -p release
+          mv release/win/* release/ 2>/dev/null || true
+          mv release/mac/* release/ 2>/dev/null || true
+          ls -la release
+
+      - name: Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          tag_name: v1.0.2
+          name: 文字隐写工具桌面端 v1.0.2
+          body: |
+            文字隐写工具 Windows 与 macOS 桌面版安装包
+            - Windows：运行 `.exe` 安装程序，或下载 Portable 免安装版
+            - macOS：运行 `.dmg` 安装包，或下载 `.zip` 解压使用
+            - 功能与网页版完全一致，支持离线使用
+            - macOS 版为未签名应用，首次打开请在程序图标上右键选择“打开”
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
