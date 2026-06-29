@@ -977,7 +977,7 @@ function encryptSmartCamo(text) {
   
   // 有域名，生成真实可点击的链接
   const encoded = btoa(unescape(encodeURIComponent(text))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  const url = userDomain + '/?d=' + encoded;
+  const url = userDomain.replace(/\/$/, '') + '/?d=' + encoded;
   
   const templates = [
     { prefix: '跟你说个事，', suffix: '，记得回我。', linkText: '查看详情' },
