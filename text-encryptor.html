@@ -108,7 +108,8 @@ body {
 }
 
 .settings-body.open {
-  max-height: 200px;
+  max-height: 1000px;
+  overflow-y: auto;
 }
 
 .setting-item {
@@ -398,7 +399,87 @@ body {
   font-weight: 600;
 }
 
-/* Footer */
+/* Anti-fold variants */
+.anti-fold-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.anti-fold-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.anti-fold-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.anti-fold-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.anti-fold-btn.primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+}
+
+.anti-fold-btn.primary:hover {
+  opacity: 0.9;
+}
+
+.anti-fold-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.anti-fold-item {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.anti-fold-item-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.anti-fold-text {
+  margin: 0;
+  padding: 8px;
+  background: #f8fafc;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #0f172a;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+}
+
 .footer {
   text-align: center;
   padding: 24px;
@@ -561,16 +642,52 @@ body {
         <input type="text" class="setting-input" id="domainInput" placeholder="例如：https://yourname.github.io/text-tool">
         <div class="setting-hint">
           💡 将本工具部署到公网后，把地址填在这里。「智能伪装」模式会自动把原文加密到链接参数中，并把链接嵌在一段正常聊天文案里。在微信/抖音/小红书里发送时，URL 部分会自动变成可点击链接。
-          <br><br>
-          <strong>免费部署方式：</strong>
-          <br>1. GitHub Pages：创建仓库 → 上传 text-encryptor.html → 开启 Pages
-          <br>2. Vercel：导入 GitHub 仓库 → 自动部署
-          <br>3. Netlify：拖拽 HTML 文件 → 立即部署
-          <br><br>
-          部署成功后，把地址填在这里，然后点「保存设置」。
         </div>
       </div>
-      <div style="margin-top: 12px; display: flex; gap: 8px;">
+      
+      <div class="setting-item" style="margin-top: 20px;">
+        <label class="setting-label">🔗 智能伪装链接类型</label>
+        <select class="setting-input" id="camoLinkTypeSelect" style="width: auto; min-width: 220px;">
+          <option value="decrypt">解密链接（点击后自动显示原文）</option>
+          <option value="qrcode">跳转二维码（点击后打开微信二维码图片）</option>
+        </select>
+      </div>
+      
+      <div class="setting-item" style="margin-top: 12px;">
+        <label class="setting-label">📝 链接显示文字（如：点击查看详情、加微信咨询）</label>
+        <input type="text" class="setting-input" id="camoLinkTextInput" placeholder="点击查看详情" value="点击查看详情">
+      </div>
+      
+      <div class="setting-item" style="margin-top: 12px;">
+        <label class="setting-label">🖼️ 二维码图片地址（用于「跳转二维码」模式）</label>
+        <input type="text" class="setting-input" id="qrcodeInput" placeholder="https://example.com/qrcode.png">
+        <div class="setting-hint">
+          💡 在这里填写你的微信二维码图片链接。智能伪装会生成「点击文字 → 打开二维码图片」的文案，用户点击后可直接长按识别加微信。不要在聊天里直接发二维码图片，容易封号。
+          <br><br>
+          <strong>获取二维码链接的方式：</strong>
+          <br>1. 把二维码图片发给微信「文件传输助手」，长按图片 → 复制图片链接
+          <br>2. 把图片上传到 GitHub 仓库（见下方上传按钮）
+          <br>3. 使用任何图床（如 imgbb、sm.ms）获取图片直链
+        </div>
+      </div>
+      
+      <div class="setting-item" style="margin-top: 12px;">
+        <label class="setting-label">🔑 GitHub Token（可选，用于上传二维码到仓库）</label>
+        <input type="password" class="setting-input" id="githubTokenInput" placeholder="ghp_xxxxxxxxxxxx" style="font-family: monospace;">
+        <div class="setting-hint">
+          💡 只在当前浏览器保存，不上传到服务器。填写后点击下方「上传二维码」按钮，图片会自动上传到你的 GitHub 仓库并获取图片直链。
+        </div>
+        <div style="margin-top: 10px;">
+          <input type="file" id="qrcodeFileInput" accept="image/*" style="display:none;" onchange="uploadQRCodeToGitHub(this)">
+          <button class="btn-sm" onclick="document.getElementById('qrcodeFileInput').click()" style="background: #f1f5f9;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            上传二维码到 GitHub
+          </button>
+          <span id="uploadStatus" style="margin-left: 10px; font-size: 13px; color: var(--text-secondary);"></span>
+        </div>
+      </div>
+      
+      <div style="margin-top: 20px; display: flex; gap: 8px; flex-wrap: wrap;">
         <button class="btn-sm" onclick="saveSettings()" style="background: var(--primary); color: white; padding: 10px 24px; border-radius: 10px; font-weight: 600;">💾 保存设置</button>
         <button class="btn-sm" onclick="testDomain()" style="background: #f1f5f9;">🧪 测试链接</button>
       </div>
@@ -585,6 +702,7 @@ body {
     <div class="mode-tab" onclick="switchMode('scatter')">字符散射</div>
     <div class="mode-tab" onclick="switchMode('mixed')">混合混淆</div>
     <div class="mode-tab" onclick="switchMode('smart-camo')">智能伪装 <span class="recommend">新</span></div>
+    <div class="mode-tab" onclick="switchMode('wechat-moment')">朋友圈防折叠 <span class="recommend">强</span></div>
     <div class="mode-tab" onclick="switchMode('base64')">Base64</div>
     <div class="mode-tab" onclick="switchMode('aes')">AES加密</div>
     <div class="mode-tab" onclick="switchMode('caesar')">凯撒</div>
@@ -598,6 +716,14 @@ body {
     <div class="option-group" id="passwordGroup" style="display:none;">
       <span class="option-label">加密密码</span>
       <input type="text" class="option-input" id="passwordInput" placeholder="输入加密密码" style="width: 200px;">
+    </div>
+    <div class="option-group" id="coverGroup" style="display:none;">
+      <span class="option-label">掩护文字</span>
+      <input type="text" class="option-input" id="coverInput" placeholder="输入一段普通文字，用于隐藏加密信息" style="width: 320px;">
+    </div>
+    <div class="option-group" id="shiftGroup" style="display:none;">
+      <span class="option-label">位移量</span>
+      <input type="number" class="option-input" id="shiftInput" value="3" min="1" max="25" style="width: 100px;">
     </div>
     <div class="strength-badge" id="strengthBadge">
       <span class="dot"></span>
@@ -655,10 +781,6 @@ body {
       <div class="output-preview" id="outputPreview">
         <div class="preview-label">🔗 链接预览（在微信/抖音/小红书里会显示为蓝色可点击链接）</div>
         <div class="preview-content" id="previewContent"></div>
-        <div class="qr-section" id="qrSection" style="display:none;">
-          <div class="preview-label">📱 二维码（长按保存图片，扫码自动解密）</div>
-          <div class="qr-code" id="qrCode"></div>
-        </div>
       </div>
       <div class="panel-actions">
         <button class="btn-sm" onclick="copyOutput()">
@@ -667,15 +789,11 @@ body {
         </button>
         <button class="btn-sm" onclick="copyCamoHtml()" id="htmlBtn" style="display:none;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-          复制链接
+          复制完整文案
         </button>
         <button class="btn-sm" onclick="copySendVersion()" id="sendBtn" style="display:none;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
-          复制发送版
-        </button>
-        <button class="btn-sm" onclick="downloadQRCode()" id="qrBtn" style="display:none;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-          下载二维码
+          仅复制链接
         </button>
         <button class="btn-sm" onclick="clearOutput()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
@@ -712,6 +830,557 @@ body {
 </div>
 
 <script>
+// Copyright (c) 2013 Pieroxy <pieroxy@pieroxy.net>
+// This work is free. You can redistribute it and/or modify it
+// under the terms of the WTFPL, Version 2
+// For more information see LICENSE.txt or http://www.wtfpl.net/
+//
+// For more information, the home page:
+// http://pieroxy.net/blog/pages/lz-string/testing.html
+//
+// LZ-based compression algorithm, version 1.4.5
+var LZString = (function() {
+
+// private property
+var f = String.fromCharCode;
+var keyStrBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+var keyStrUriSafe = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$";
+var baseReverseDic = {};
+
+function getBaseValue(alphabet, character) {
+  if (!baseReverseDic[alphabet]) {
+    baseReverseDic[alphabet] = {};
+    for (var i=0 ; i<alphabet.length ; i++) {
+      baseReverseDic[alphabet][alphabet.charAt(i)] = i;
+    }
+  }
+  return baseReverseDic[alphabet][character];
+}
+
+var LZString = {
+  compressToBase64 : function (input) {
+    if (input == null) return "";
+    var res = LZString._compress(input, 6, function(a){return keyStrBase64.charAt(a);});
+    switch (res.length % 4) { // To produce valid Base64
+    default: // When could this happen ?
+    case 0 : return res;
+    case 1 : return res+"===";
+    case 2 : return res+"==";
+    case 3 : return res+"=";
+    }
+  },
+
+  decompressFromBase64 : function (input) {
+    if (input == null) return "";
+    if (input == "") return null;
+    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrBase64, input.charAt(index)); });
+  },
+
+  compressToUTF16 : function (input) {
+    if (input == null) return "";
+    return LZString._compress(input, 15, function(a){return f(a+32);}) + " ";
+  },
+
+  decompressFromUTF16: function (compressed) {
+    if (compressed == null) return "";
+    if (compressed == "") return null;
+    return LZString._decompress(compressed.length, 16384, function(index) { return compressed.charCodeAt(index) - 32; });
+  },
+
+  //compress into uint8array (UCS-2 big endian format)
+  compressToUint8Array: function (uncompressed) {
+    var compressed = LZString.compress(uncompressed);
+    var buf=new Uint8Array(compressed.length*2); // 2 bytes per character
+
+    for (var i=0, TotalLen=compressed.length; i<TotalLen; i++) {
+      var current_value = compressed.charCodeAt(i);
+      buf[i*2] = current_value >>> 8;
+      buf[i*2+1] = current_value % 256;
+    }
+    return buf;
+  },
+
+  //decompress from uint8array (UCS-2 big endian format)
+  decompressFromUint8Array:function (compressed) {
+    if (compressed===null || compressed===undefined){
+        return LZString.decompress(compressed);
+    } else {
+        var buf=new Array(compressed.length/2); // 2 bytes per character
+        for (var i=0, TotalLen=buf.length; i<TotalLen; i++) {
+          buf[i]=compressed[i*2]*256+compressed[i*2+1];
+        }
+
+        var result = [];
+        buf.forEach(function (c) {
+          result.push(f(c));
+        });
+        return LZString.decompress(result.join(''));
+
+    }
+
+  },
+
+
+  //compress into a string that is already URI encoded
+  compressToEncodedURIComponent: function (input) {
+    if (input == null) return "";
+    return LZString._compress(input, 6, function(a){return keyStrUriSafe.charAt(a);});
+  },
+
+  //decompress from an output of compressToEncodedURIComponent
+  decompressFromEncodedURIComponent:function (input) {
+    if (input == null) return "";
+    if (input == "") return null;
+    input = input.replace(/ /g, "+");
+    return LZString._decompress(input.length, 32, function(index) { return getBaseValue(keyStrUriSafe, input.charAt(index)); });
+  },
+
+  compress: function (uncompressed) {
+    return LZString._compress(uncompressed, 16, function(a){return f(a);});
+  },
+  _compress: function (uncompressed, bitsPerChar, getCharFromInt) {
+    if (uncompressed == null) return "";
+    var i, value,
+        context_dictionary= {},
+        context_dictionaryToCreate= {},
+        context_c="",
+        context_wc="",
+        context_w="",
+        context_enlargeIn= 2, // Compensate for the first entry which should not count
+        context_dictSize= 3,
+        context_numBits= 2,
+        context_data=[],
+        context_data_val=0,
+        context_data_position=0,
+        ii;
+
+    for (ii = 0; ii < uncompressed.length; ii += 1) {
+      context_c = uncompressed.charAt(ii);
+      if (!Object.prototype.hasOwnProperty.call(context_dictionary,context_c)) {
+        context_dictionary[context_c] = context_dictSize++;
+        context_dictionaryToCreate[context_c] = true;
+      }
+
+      context_wc = context_w + context_c;
+      if (Object.prototype.hasOwnProperty.call(context_dictionary,context_wc)) {
+        context_w = context_wc;
+      } else {
+        if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
+          if (context_w.charCodeAt(0)<256) {
+            for (i=0 ; i<context_numBits ; i++) {
+              context_data_val = (context_data_val << 1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+            }
+            value = context_w.charCodeAt(0);
+            for (i=0 ; i<8 ; i++) {
+              context_data_val = (context_data_val << 1) | (value&1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = value >> 1;
+            }
+          } else {
+            value = 1;
+            for (i=0 ; i<context_numBits ; i++) {
+              context_data_val = (context_data_val << 1) | value;
+              if (context_data_position ==bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = 0;
+            }
+            value = context_w.charCodeAt(0);
+            for (i=0 ; i<16 ; i++) {
+              context_data_val = (context_data_val << 1) | (value&1);
+              if (context_data_position == bitsPerChar-1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = value >> 1;
+            }
+          }
+          context_enlargeIn--;
+          if (context_enlargeIn == 0) {
+            context_enlargeIn = Math.pow(2, context_numBits);
+            context_numBits++;
+          }
+          delete context_dictionaryToCreate[context_w];
+        } else {
+          value = context_dictionary[context_w];
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+
+
+        }
+        context_enlargeIn--;
+        if (context_enlargeIn == 0) {
+          context_enlargeIn = Math.pow(2, context_numBits);
+          context_numBits++;
+        }
+        // Add wc to the dictionary.
+        context_dictionary[context_wc] = context_dictSize++;
+        context_w = String(context_c);
+      }
+    }
+
+    // Output the code for w.
+    if (context_w !== "") {
+      if (Object.prototype.hasOwnProperty.call(context_dictionaryToCreate,context_w)) {
+        if (context_w.charCodeAt(0)<256) {
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+          }
+          value = context_w.charCodeAt(0);
+          for (i=0 ; i<8 ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+        } else {
+          value = 1;
+          for (i=0 ; i<context_numBits ; i++) {
+            context_data_val = (context_data_val << 1) | value;
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = 0;
+          }
+          value = context_w.charCodeAt(0);
+          for (i=0 ; i<16 ; i++) {
+            context_data_val = (context_data_val << 1) | (value&1);
+            if (context_data_position == bitsPerChar-1) {
+              context_data_position = 0;
+              context_data.push(getCharFromInt(context_data_val));
+              context_data_val = 0;
+            } else {
+              context_data_position++;
+            }
+            value = value >> 1;
+          }
+        }
+        context_enlargeIn--;
+        if (context_enlargeIn == 0) {
+          context_enlargeIn = Math.pow(2, context_numBits);
+          context_numBits++;
+        }
+        delete context_dictionaryToCreate[context_w];
+      } else {
+        value = context_dictionary[context_w];
+        for (i=0 ; i<context_numBits ; i++) {
+          context_data_val = (context_data_val << 1) | (value&1);
+          if (context_data_position == bitsPerChar-1) {
+            context_data_position = 0;
+            context_data.push(getCharFromInt(context_data_val));
+            context_data_val = 0;
+          } else {
+            context_data_position++;
+          }
+          value = value >> 1;
+        }
+
+
+      }
+      context_enlargeIn--;
+      if (context_enlargeIn == 0) {
+        context_enlargeIn = Math.pow(2, context_numBits);
+        context_numBits++;
+      }
+    }
+
+    // Mark the end of the stream
+    value = 2;
+    for (i=0 ; i<context_numBits ; i++) {
+      context_data_val = (context_data_val << 1) | (value&1);
+      if (context_data_position == bitsPerChar-1) {
+        context_data_position = 0;
+        context_data.push(getCharFromInt(context_data_val));
+        context_data_val = 0;
+      } else {
+        context_data_position++;
+      }
+      value = value >> 1;
+    }
+
+    // Flush the last char
+    while (true) {
+      context_data_val = (context_data_val << 1);
+      if (context_data_position == bitsPerChar-1) {
+        context_data.push(getCharFromInt(context_data_val));
+        break;
+      }
+      else context_data_position++;
+    }
+    return context_data.join('');
+  },
+
+  decompress: function (compressed) {
+    if (compressed == null) return "";
+    if (compressed == "") return null;
+    return LZString._decompress(compressed.length, 32768, function(index) { return compressed.charCodeAt(index); });
+  },
+
+  _decompress: function (length, resetValue, getNextValue) {
+    var dictionary = [],
+        next,
+        enlargeIn = 4,
+        dictSize = 4,
+        numBits = 3,
+        entry = "",
+        result = [],
+        i,
+        w,
+        bits, resb, maxpower, power,
+        c,
+        data = {val:getNextValue(0), position:resetValue, index:1};
+
+    for (i = 0; i < 3; i += 1) {
+      dictionary[i] = i;
+    }
+
+    bits = 0;
+    maxpower = Math.pow(2,2);
+    power=1;
+    while (power!=maxpower) {
+      resb = data.val & data.position;
+      data.position >>= 1;
+      if (data.position == 0) {
+        data.position = resetValue;
+        data.val = getNextValue(data.index++);
+      }
+      bits |= (resb>0 ? 1 : 0) * power;
+      power <<= 1;
+    }
+
+    switch (next = bits) {
+      case 0:
+          bits = 0;
+          maxpower = Math.pow(2,8);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+        c = f(bits);
+        break;
+      case 1:
+          bits = 0;
+          maxpower = Math.pow(2,16);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+        c = f(bits);
+        break;
+      case 2:
+        return "";
+    }
+    dictionary[3] = c;
+    w = c;
+    result.push(c);
+    while (true) {
+      if (data.index > length) {
+        return "";
+      }
+
+      bits = 0;
+      maxpower = Math.pow(2,numBits);
+      power=1;
+      while (power!=maxpower) {
+        resb = data.val & data.position;
+        data.position >>= 1;
+        if (data.position == 0) {
+          data.position = resetValue;
+          data.val = getNextValue(data.index++);
+        }
+        bits |= (resb>0 ? 1 : 0) * power;
+        power <<= 1;
+      }
+
+      switch (c = bits) {
+        case 0:
+          bits = 0;
+          maxpower = Math.pow(2,8);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+
+          dictionary[dictSize++] = f(bits);
+          c = dictSize-1;
+          enlargeIn--;
+          break;
+        case 1:
+          bits = 0;
+          maxpower = Math.pow(2,16);
+          power=1;
+          while (power!=maxpower) {
+            resb = data.val & data.position;
+            data.position >>= 1;
+            if (data.position == 0) {
+              data.position = resetValue;
+              data.val = getNextValue(data.index++);
+            }
+            bits |= (resb>0 ? 1 : 0) * power;
+            power <<= 1;
+          }
+          dictionary[dictSize++] = f(bits);
+          c = dictSize-1;
+          enlargeIn--;
+          break;
+        case 2:
+          return result.join('');
+      }
+
+      if (enlargeIn == 0) {
+        enlargeIn = Math.pow(2, numBits);
+        numBits++;
+      }
+
+      if (dictionary[c]) {
+        entry = dictionary[c];
+      } else {
+        if (c === dictSize) {
+          entry = w + w.charAt(0);
+        } else {
+          return null;
+        }
+      }
+      result.push(entry);
+
+      // Add w+entry[0] to the dictionary.
+      dictionary[dictSize++] = w + entry.charAt(0);
+      enlargeIn--;
+
+      w = entry;
+
+      if (enlargeIn == 0) {
+        enlargeIn = Math.pow(2, numBits);
+        numBits++;
+      }
+
+    }
+  }
+};
+  return LZString;
+})();
+
+if (typeof define === 'function' && define.amd) {
+  define(function () { return LZString; });
+} else if( typeof module !== 'undefined' && module != null ) {
+  module.exports = LZString
+} else if( typeof angular !== 'undefined' && angular != null ) {
+  angular.module('LZString', [])
+  .factory('LZString', function () {
+    return LZString;
+  });
+}
+
+</script>
+<script>
+// URL-safe Base64 工具函数（避免使用废弃的 escape/unescape）
+function utf8ToBase64(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+    return String.fromCharCode(parseInt(p1, 16));
+  }));
+}
+function base64ToUtf8(str) {
+  return decodeURIComponent(atob(str).split('').map(function(c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+}
+function urlSafeEncode(str) {
+  return utf8ToBase64(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+function urlSafeDecode(str) {
+  let s = str.replace(/-/g, '+').replace(/_/g, '/');
+  const pad = (4 - (s.length % 4)) % 4;
+  if (pad) s += '='.repeat(pad);
+  return base64ToUtf8(s);
+}
+
+// Uint8Array 与 Base64 互转（用于 AES）
+function bytesToBase64(bytes) {
+  let binary = '';
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+function base64ToBytes(str) {
+  let s = str.replace(/-/g, '+').replace(/_/g, '/');
+  const pad = (4 - (s.length % 4)) % 4;
+  if (pad) s += '='.repeat(pad);
+  const binary = atob(s);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
 // ========== 配置 ==========
 const ZERO_WIDTH_CHARS = ['\u200b', '\u200c', '\u200d', '\u2060', '\ufeff'];
 const VARIATION_SELECTORS = ['\ufe00', '\ufe01', '\ufe02', '\ufe03', '\ufe04', '\ufe05', '\ufe06', '\ufe07', '\ufe08', '\ufe09', '\ufe0a', '\ufe0b', '\ufe0c', '\ufe0d', '\ufe0e', '\ufe0f'];
@@ -726,15 +1395,29 @@ const HOMOGLYPH_MAP = {
 
 let currentMode = 'zero-mix';
 let userDomain = localStorage.getItem('toolDomain') || 'https://xbtds02.github.io/text-encryptor/';
+let qrcodeUrl = localStorage.getItem('qrcodeUrl') || '';
+let githubToken = localStorage.getItem('githubToken') || '';
+let camoLinkText = localStorage.getItem('camoLinkText') || '点击查看详情';
+let camoLinkType = localStorage.getItem('camoLinkType') || 'decrypt';
 let lastCamoHtml = '';
 let lastCamoUrl = '';
 let lastCamoSend = '';
+let lastAntiFoldVariants = [];
+let lastAntiFoldInput = '';
 
 // ========== 初始化 ==========
 function init() {
   if (userDomain) {
     document.getElementById('domainInput').value = userDomain;
   }
+  const qrcodeInput = document.getElementById('qrcodeInput');
+  if (qrcodeInput && qrcodeUrl) qrcodeInput.value = qrcodeUrl;
+  const camoLinkTextInput = document.getElementById('camoLinkTextInput');
+  if (camoLinkTextInput && camoLinkText) camoLinkTextInput.value = camoLinkText;
+  const camoLinkTypeSelect = document.getElementById('camoLinkTypeSelect');
+  if (camoLinkTypeSelect && camoLinkType) camoLinkTypeSelect.value = camoLinkType;
+  const githubTokenInput = document.getElementById('githubTokenInput');
+  if (githubTokenInput && githubToken) githubTokenInput.value = githubToken;
   updateOptions();
   updateCounts();
   
@@ -743,11 +1426,17 @@ function init() {
   const d = params.get('d');
   if (d) {
     try {
-      const decoded = decodeURIComponent(escape(atob(d)));
+      let decoded = LZString.decompressFromEncodedURIComponent(d);
+      if (decoded === null) {
+        // 兼容旧版 urlSafe 编码
+        decoded = urlSafeDecode(d);
+      }
       document.getElementById('inputText').value = decoded;
+      document.getElementById('outputText').value = decoded;
       updateCounts();
-      showToast('✅ 已自动填入解密内容，请选择对应模式后点「解密」');
+      showToast('✅ 已自动显示原文，可直接复制');
     } catch(e) {
+      console.error('Decode error:', e);
       showToast('⚠️ 链接内容解析失败');
     }
   }
@@ -764,7 +1453,6 @@ function toggleSettings() {
 function saveSettings() {
   const domain = document.getElementById('domainInput').value.trim();
   if (domain) {
-    // 确保域名格式正确
     let formatted = domain;
     if (!formatted.startsWith('http')) {
       formatted = 'https://' + formatted;
@@ -773,12 +1461,25 @@ function saveSettings() {
     userDomain = formatted;
     localStorage.setItem('toolDomain', formatted);
     document.getElementById('domainInput').value = formatted;
-    showToast('✅ 域名已保存：「智能伪装」模式现在会生成真实可点击链接');
   } else {
     userDomain = '';
     localStorage.removeItem('toolDomain');
-    showToast('✅ 已清除域名设置');
   }
+  
+  qrcodeUrl = document.getElementById('qrcodeInput').value.trim();
+  if (qrcodeUrl) localStorage.setItem('qrcodeUrl', qrcodeUrl); else localStorage.removeItem('qrcodeUrl');
+  
+  camoLinkText = document.getElementById('camoLinkTextInput').value.trim() || '点击查看详情';
+  localStorage.setItem('camoLinkText', camoLinkText);
+  
+  camoLinkType = document.getElementById('camoLinkTypeSelect').value || 'decrypt';
+  localStorage.setItem('camoLinkType', camoLinkType);
+  
+  githubToken = document.getElementById('githubTokenInput').value.trim();
+  if (githubToken) localStorage.setItem('githubToken', githubToken); else localStorage.removeItem('githubToken');
+  
+  updateModeInfo();
+  showToast('✅ 设置已保存');
 }
 
 function testDomain() {
@@ -792,6 +1493,63 @@ function testDomain() {
   showToast('🔗 已打开测试链接，检查是否能正常访问');
 }
 
+async function uploadQRCodeToGitHub(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const tokenInput = document.getElementById('githubTokenInput');
+  const token = tokenInput ? tokenInput.value.trim() : '';
+  if (!token) {
+    showToast('⚠️ 请先填写 GitHub Token');
+    return;
+  }
+  
+  const status = document.getElementById('uploadStatus');
+  if (status) status.textContent = '上传中...';
+  
+  try {
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    
+    const ext = file.name.split('.').pop() || 'png';
+    const filename = 'qrcode-' + Date.now() + '.' + ext;
+    const repo = 'xbtds02/text-encryptor';
+    const body = JSON.stringify({ message: 'Upload QR code ' + filename, content: base64, branch: 'main' });
+    
+    const resp = await fetch('https://api.github.com/repos/' + repo + '/contents/' + filename, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + token,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: body
+    });
+    
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.message || 'HTTP ' + resp.status);
+    }
+    
+    const data = await resp.json();
+    const rawUrl = 'https://raw.githubusercontent.com/' + repo + '/main/' + filename;
+    qrcodeUrl = rawUrl;
+    localStorage.setItem('qrcodeUrl', rawUrl);
+    const qrcodeInput = document.getElementById('qrcodeInput');
+    if (qrcodeInput) qrcodeInput.value = rawUrl;
+    if (status) status.textContent = '上传成功：' + filename;
+    showToast('✅ 二维码已上传：' + filename);
+  } catch (e) {
+    console.error(e);
+    if (status) status.textContent = '上传失败';
+    showToast('❌ 上传失败：' + e.message);
+  }
+  input.value = '';
+}
+
 // ========== 模式切换 ==========
 const modeInfoMap = {
   'zero-mix': { title: '零宽混淆（强力）', desc: '在每个字符之间随机插入 1-5 个零宽字符。加密后文字看起来一模一样，但平台的关键词匹配完全失效。推荐用于绕过抖音/微信/小红书审核。' },
@@ -800,6 +1558,7 @@ const modeInfoMap = {
   'scatter': { title: '字符散射', desc: '在每个字符后追加随机变体选择器（Variation Selectors）。文字渲染效果不变，但字符编码已被「污染」，平台无法匹配原文。' },
   'mixed': { title: '混合深度混淆', desc: '组合零宽混淆 + 同形替换 + 字符散射三种方式。混淆程度最高，几乎不可能被还原，同时保留视觉一致性。' },
   'smart-camo': { title: '智能伪装（新）', desc: '将原文加密到链接参数中，再套上一段看起来像正常聊天的文案（如「跟你说个事，https://...，记得回我」）。链接嵌在文字中间，在微信/抖音/小红书里 URL 部分会变成可点击链接。' + (userDomain ? ' ✅ 已配置域名：' + userDomain : ' ⚠️ 请先在「高级设置」中配置工具公网域名。') },
+  'wechat-moment': { title: '朋友圈防折叠', desc: '将一段朋友圈文案生成多个互不相同的变体。通过同义替换、零宽字符、变体选择器、emoji、换行等组合，让同一段内容在多个微信号/设备上发布时不容易被折叠。' },
   'base64': { title: 'Base64 编码', desc: '标准 Base64 编码，通用性好，但加密后内容完全改变。适合作为二层加密使用。' },
   'aes': { title: 'AES-256 加密', desc: '使用 AES-256-GCM 加密，需要密码。安全性最高，没有密码无法解密。适合敏感信息。' },
   'caesar': { title: '凯撒密码', desc: '经典凯撒移位加密，每个字母按位移量替换。简单但有效，适合快速加密。' },
@@ -824,7 +1583,11 @@ function updateModeInfo() {
 
 function updateOptions() {
   const passwordGroup = document.getElementById('passwordGroup');
+  const coverGroup = document.getElementById('coverGroup');
+  const shiftGroup = document.getElementById('shiftGroup');
   passwordGroup.style.display = (currentMode === 'zero-mix' || currentMode === 'mixed' || currentMode === 'aes') ? 'block' : 'none';
+  coverGroup.style.display = (currentMode === 'zero-hide') ? 'block' : 'none';
+  shiftGroup.style.display = (currentMode === 'caesar') ? 'block' : 'none';
   updateStrength();
 }
 
@@ -893,8 +1656,7 @@ function decryptZeroMix(text) {
 
 function encryptHomoglyph(text) {
   let result = '';
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
+  for (const ch of text) {
     result += HOMOGLYPH_MAP[ch] || ch;
   }
   return result;
@@ -906,8 +1668,7 @@ function decryptHomoglyph(text) {
     reverseMap[v] = k;
   }
   let result = '';
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
+  for (const ch of text) {
     result += reverseMap[ch] || ch;
   }
   return result;
@@ -915,18 +1676,18 @@ function decryptHomoglyph(text) {
 
 function encryptScatter(text) {
   let result = '';
-  for (let i = 0; i < text.length; i++) {
-    result += text[i];
-    const idx = (i * 7) % VARIATION_SELECTORS.length;
-    result += VARIATION_SELECTORS[idx];
+  let i = 0;
+  for (const ch of text) {
+    result += ch;
+    result += VARIATION_SELECTORS[(i * 7) % VARIATION_SELECTORS.length];
+    i++;
   }
   return result;
 }
 
 function decryptScatter(text) {
   let result = '';
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
+  for (const ch of text) {
     if (!VARIATION_SELECTORS.includes(ch)) {
       result += ch;
     }
@@ -938,8 +1699,7 @@ function encryptMixed(text, password) {
   let result = encryptZeroMix(text, password);
   result = encryptScatter(result);
   let final = '';
-  for (let i = 0; i < result.length; i++) {
-    const ch = result[i];
+  for (const ch of result) {
     final += HOMOGLYPH_MAP[ch] || ch;
   }
   return final;
@@ -952,61 +1712,196 @@ function decryptMixed(text) {
   return result;
 }
 
-function encryptZeroHide(text, cover) {
-  if (!cover) cover = '这是一段看起来正常的文字，但其实里面藏了秘密。';
-  const binary = Array.from(text).map(c => c.charCodeAt(0).toString(2).padStart(16, '0')).join('');
-  let hidden = '';
-  for (let i = 0; i < binary.length; i++) {
-    hidden += binary[i] === '1' ? ZERO_WIDTH_CHARS[2] : ZERO_WIDTH_CHARS[0];
-  }
-  const insertPos = Math.floor(cover.length / 2);
-  return cover.slice(0, insertPos) + hidden + cover.slice(insertPos);
+function textToBinary(text) {
+  return Array.from(text).map(c => c.codePointAt(0).toString(2).padStart(16, '0')).join('');
 }
 
-function decryptZeroHide(text) {
-  let binaryStr = '';
-  const hiddenPart = text.slice(text.length / 2 - Math.ceil(text.length / 4), text.length / 2 + Math.ceil(text.length / 4));
-  for (let i = 0; i < hiddenPart.length; i++) {
-    const ch = hiddenPart[i];
-    if (ZERO_WIDTH_CHARS.includes(ch)) {
-      binaryStr += ch === ZERO_WIDTH_CHARS[2] ? '1' : '0';
-    }
-  }
+function binaryToText(binary) {
   let result = '';
-  for (let i = 0; i < binaryStr.length; i += 16) {
-    const bin = binaryStr.slice(i, i + 16);
-    if (bin.length === 16) {
-      result += String.fromCharCode(parseInt(bin, 2));
-    }
+  for (let i = 0; i < binary.length; i += 16) {
+    const bin = binary.slice(i, i + 16);
+    if (bin.length < 16) break;
+    const code = parseInt(bin, 2);
+    if (code === 0) break;
+    result += String.fromCodePoint(code);
   }
   return result;
 }
 
+function encryptZeroHide(text, cover) {
+  if (!cover) cover = '这是一段看起来正常的文字，但其实里面藏了秘密。';
+  const binary = textToBinary(text);
+  let result = '';
+  for (let i = 0; i < binary.length; i++) {
+    result += cover[i % cover.length];
+    result += binary[i] === '1' ? ZERO_WIDTH_CHARS[2] : ZERO_WIDTH_CHARS[0];
+  }
+  return result;
+}
+
+function decryptZeroHide(text) {
+  let binary = '';
+  for (const ch of text) {
+    if (ch === ZERO_WIDTH_CHARS[0]) binary += '0';
+    else if (ch === ZERO_WIDTH_CHARS[2]) binary += '1';
+  }
+  return binaryToText(binary);
+}
+
+// ========== 朋友圈防折叠 ==========
+// 核心原则：
+// 1. 肉眼看到的文字与原文一致，排版（换行、空格、段落）不变。
+// 2. 底层字节尽可能“乱码”：同形字替换 + 随机插入零宽字符/变体选择器。
+// 3. 让微信的「相同内容折叠」算法判定为不同文本。
+function generateAntiFoldVariants(text) {
+  const count = 5;
+  const results = [];
+  if (!text || !text.trim()) return { html: '', text: '' };
+
+  // 按原文的换行拆分成行，保留原始排版
+  const lines = text.split('\n');
+  const zc = ZERO_WIDTH_CHARS.length;
+  const vc = VARIATION_SELECTORS.length;
+
+  // 同形字映射：视觉一致，编码不同（只影响 ASCII 字母/数字）
+  const visualHomoglyphs = {
+    'a': 'а', 'b': '𝖻', 'c': 'с', 'd': '𝖽', 'e': 'е', 'f': '𝖿', 'g': '𝗀', 'h': 'һ',
+    'i': 'і', 'j': '𝗃', 'k': '𝗄', 'l': '𝗅', 'm': '𝗆', 'n': '𝗇', 'o': 'о', 'p': 'р',
+    'q': '𝗊', 'r': '𝗋', 's': 'ѕ', 't': '𝗍', 'u': '𝗎', 'v': '𝗏', 'w': '𝗐', 'x': 'х',
+    'y': 'у', 'z': '𝗓',
+    'A': 'А', 'B': 'В', 'C': 'С', 'D': '𝖣', 'E': 'Е', 'F': '𝖥', 'G': '𝖦', 'H': 'Н',
+    'I': 'І', 'J': '𝖩', 'K': 'К', 'L': '𝖫', 'M': 'М', 'N': '𝖭', 'O': 'О', 'P': 'Р',
+    'Q': '𝖰', 'R': '𝖱', 'S': 'Ѕ', 'T': 'Т', 'U': '𝖴', 'V': '𝖵', 'W': '𝖶', 'X': 'Х',
+    'Y': 'У', 'Z': '𝖹',
+    '0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒', '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗'
+  };
+
+  for (let n = 0; n < count; n++) {
+    const variantLines = lines.map((line) => {
+      let variant = '';
+      const chars = Array.from(line);
+
+      for (let i = 0; i < chars.length; i++) {
+        let ch = chars[i];
+
+        // 以高概率把 ASCII 字母/数字替换为视觉同形但编码不同的 Unicode 字符
+        // 每个变体采用不同的替换模式，确保底层字节不同
+        if (visualHomoglyphs[ch] && ((i + n * 3) % 2 === 0)) {
+          ch = visualHomoglyphs[ch];
+        }
+
+        variant += ch;
+
+        // 高密度插入不可见字符：零宽字符或变体选择器
+        const r = (i * 17 + n * 31) % 100;
+        if (r < 35) {
+          variant += ZERO_WIDTH_CHARS[(i + n) % zc];
+        } else if (r < 70) {
+          variant += VARIATION_SELECTORS[(i + n * 5) % vc];
+        }
+      }
+
+      return variant;
+    });
+
+    results.push({ label: '变体 ' + (n + 1), text: variantLines.join('\n') });
+  }
+
+  lastAntiFoldVariants = results;
+  lastAntiFoldInput = text;
+
+  // 构造预览 HTML：每个变体一张卡片，带一键复制按钮
+  let html = '<div class="anti-fold-header">';
+  html += '<span style="font-weight:700;color:#0f172a;">🛡️ 朋友圈防折叠变体（文字与排版不变，底层字节已打乱）</span>';
+  html += '<div class="anti-fold-actions">';
+  html += '<button class="anti-fold-btn primary" onclick="copyAntiFoldAll()">一键复制全部</button>';
+  html += '<button class="anti-fold-btn" onclick="regenerateAntiFold()">重新生成</button>';
+  html += '</div></div>';
+  html += '<div class="anti-fold-list">';
+  for (let i = 0; i < results.length; i++) {
+    html += '<div class="anti-fold-item">';
+    html += '<div class="anti-fold-item-title">';
+    html += '<span>【' + results[i].label + '】</span>';
+    html += '<button class="anti-fold-btn" onclick="copyAntiFoldVariant(' + i + ')">一键复制</button>';
+    html += '</div>';
+    html += '<pre class="anti-fold-text">' + escapeHtml(results[i].text) + '</pre>';
+    html += '</div>';
+  }
+  html += '</div>';
+
+  // 纯文本拼接：供 textarea 和「全部复制」使用
+  const plainText = results.map(r => '【' + r.label + '】\n' + r.text).join('\n\n');
+
+  return { html, text: plainText };
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function copyAntiFoldVariant(index) {
+  if (!lastAntiFoldVariants[index]) return;
+  navigator.clipboard.writeText(lastAntiFoldVariants[index].text).then(() => {
+    showToast('✅ 已复制「' + lastAntiFoldVariants[index].label + '」');
+  });
+}
+
+function copyAntiFoldAll() {
+  if (!lastAntiFoldVariants.length) return;
+  const all = lastAntiFoldVariants.map(r => '【' + r.label + '】\n' + r.text).join('\n\n');
+  navigator.clipboard.writeText(all).then(() => {
+    showToast('✅ 已复制全部 ' + lastAntiFoldVariants.length + ' 个变体');
+  });
+}
+
+function regenerateAntiFold() {
+  if (!lastAntiFoldInput) return;
+  document.getElementById('inputText').value = lastAntiFoldInput;
+  doEncrypt();
+}
+
+
 // 智能伪装：把加密链接嵌在一段正常聊天文案中
 function encryptSmartCamo(text) {
   if (!userDomain) {
-    // 没有配置域名，给出提示
     lastCamoUrl = '';
     lastCamoSend = '';
     return '⚠️ 未配置域名。请在「高级设置」中填入工具公网域名，智能伪装模式才能生成可点击链接。';
   }
   
-  // 原文编码进 URL 参数
-  const encoded = btoa(unescape(encodeURIComponent(text))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  const url = userDomain.replace(/\/$/, '') + '/?d=' + encoded;
-  lastCamoUrl = url;
+  if (camoLinkType === 'qrcode') {
+    if (!qrcodeUrl) {
+      lastCamoUrl = '';
+      lastCamoSend = '';
+      return '⚠️ 未配置二维码图片地址。请在「高级设置」中上传或填写二维码图片链接，并选择「跳转二维码」模式。';
+    }
+    lastCamoUrl = qrcodeUrl;
+  } else {
+    // 原文压缩后编码进 URL 参数，显著缩短长文案链接
+    const encoded = LZString.compressToEncodedURIComponent(text);
+    const url = userDomain.replace(/\/$/, '') + '/?d=' + encoded;
+    lastCamoUrl = url;
+  }
   
   const templates = [
     { prefix: '跟你说个事，', suffix: '，记得回我。' },
     { prefix: '今天聊到这个，', suffix: '，你看看。' },
     { prefix: '发你一个东西，', suffix: '，有空看下。' },
     { prefix: '刚才想到的，', suffix: '，分享给你。' },
-    { prefix: '这个挺重要的，', suffix: '，赶紧看看。' }
+    { prefix: '这个挺重要的，', suffix: '，赶紧看看。' },
+    { prefix: '小柏兔电商一站式服务，欢迎合作，', suffix: '。' },
+    { prefix: '一直在做电商服务，', suffix: '，欢迎交流。' }
   ];
   
   const template = templates[Math.floor(Math.random() * templates.length)];
+  const linkText = camoLinkText || '点击查看详情';
   // 返回的就是纯文本，URL 嵌在文字中间，平台会自动识别为可点击链接
-  lastCamoSend = template.prefix + url + template.suffix;
+  lastCamoSend = template.prefix + linkText + '：' + lastCamoUrl + template.suffix;
   return lastCamoSend;
 }
 
@@ -1019,16 +1914,19 @@ function decryptSmartCamo(text) {
   if (hrefMatch) {
     urlText = hrefMatch[1];
   } else {
-    // 否则直接匹配文本中的 URL
-    const urlMatch = text.match(/(https?:\/\/[^\s]+)/);
-    if (urlMatch) urlText = urlMatch[1];
+    // 否则直接匹配文本中的 URL（避免把中文标点包含进去）
+    const urlMatch = text.match(/https?:\/\/[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=%]+/);
+    if (urlMatch) urlText = urlMatch[0];
   }
   
   try {
     const url = new URL(urlText);
     const d = url.searchParams.get('d');
     if (d) {
-      return decodeURIComponent(escape(atob(d.replace(/-/g, '+').replace(/_/g, '/'))));
+      const decoded = LZString.decompressFromEncodedURIComponent(d);
+      if (decoded !== null) return decoded;
+      // 兼容旧版 urlSafe 编码
+      return urlSafeDecode(d);
     }
   } catch(e) {}
   
@@ -1037,12 +1935,12 @@ function decryptSmartCamo(text) {
 }
 
 function encryptBase64(text) {
-  return btoa(unescape(encodeURIComponent(text)));
+  return utf8ToBase64(text);
 }
 
 function decryptBase64(text) {
   try {
-    return decodeURIComponent(escape(atob(text)));
+    return base64ToUtf8(text);
   } catch(e) {
     return '❌ Base64 解码失败，请检查输入格式';
   }
@@ -1108,14 +2006,62 @@ function encryptReverse(text) {
   return text.split('').reverse().join('');
 }
 
-function encryptAES(text, password) {
-  // 简化版 AES（使用 Web Crypto API 需要异步，这里用简化版本）
-  showToast('⚠️ AES-256 加密需要在浏览器中启用 Web Crypto API，当前使用增强版零宽混淆替代');
-  return encryptZeroMix(text, password);
+async function getAESKey(password) {
+  const cryptoAPI = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : crypto;
+  const enc = new TextEncoder();
+  const keyMaterial = await cryptoAPI.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+  return await cryptoAPI.subtle.deriveKey(
+    { name: 'PBKDF2', salt: enc.encode('text-encryptor-salt-v1'), iterations: 100000, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+async function encryptAES(text, password) {
+  if (!password) {
+    showToast('⚠️ AES加密需要输入密码');
+    return '⚠️ AES加密需要输入密码';
+  }
+  try {
+    const cryptoAPI = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : crypto;
+    const key = await getAESKey(password);
+    const iv = cryptoAPI.getRandomValues(new Uint8Array(12));
+    const enc = new TextEncoder();
+    const ciphertext = await cryptoAPI.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, enc.encode(text));
+    const combined = new Uint8Array(iv.length + ciphertext.byteLength);
+    combined.set(iv, 0);
+    combined.set(new Uint8Array(ciphertext), iv.length);
+    return bytesToBase64(combined);
+  } catch (e) {
+    console.error(e);
+    return '❌ AES 加密失败：' + e.message;
+  }
+}
+
+async function decryptAES(text, password) {
+  if (!password) {
+    showToast('⚠️ AES解密需要输入密码');
+    return '⚠️ AES解密需要输入密码';
+  }
+  try {
+    const cryptoAPI = (typeof globalThis !== 'undefined' && globalThis.crypto && globalThis.crypto.subtle) ? globalThis.crypto : crypto;
+    const key = await getAESKey(password);
+    const data = base64ToBytes(text);
+    if (data.length < 13) return '❌ AES 密文格式错误';
+    const iv = data.slice(0, 12);
+    const ciphertext = data.slice(12);
+    const plaintext = await cryptoAPI.subtle.decrypt({ name: 'AES-GCM', iv: iv }, key, ciphertext);
+    return new TextDecoder().decode(plaintext);
+  } catch (e) {
+    console.error(e);
+    return '❌ AES 解密失败：密码错误或密文损坏';
+  }
 }
 
 // ========== 主流程 ==========
-function doEncrypt() {
+async function doEncrypt() {
   const input = document.getElementById('inputText').value;
   if (!input) {
     showToast('⚠️ 请先输入要加密的文字');
@@ -1128,17 +2074,29 @@ function doEncrypt() {
   let result = '';
   switch(currentMode) {
     case 'zero-mix': result = encryptZeroMix(input, password); break;
-    case 'zero-hide': result = encryptZeroHide(input, ''); break;
+    case 'zero-hide': result = encryptZeroHide(input, document.getElementById('coverInput').value); break;
     case 'homoglyph': result = encryptHomoglyph(input); break;
     case 'scatter': result = encryptScatter(input); break;
     case 'mixed': result = encryptMixed(input, password); break;
     case 'smart-camo': result = encryptSmartCamo(input); break;
+    case 'wechat-moment': {
+      const antiFold = generateAntiFoldVariants(input);
+      setOutput(antiFold.text);
+      const preview = document.getElementById('outputPreview');
+      const content = document.getElementById('previewContent');
+      preview.classList.add('show');
+      content.innerHTML = antiFold.html;
+      document.getElementById('sendBtn').style.display = 'none';
+      document.getElementById('htmlBtn').style.display = 'none';
+      showToast('✅ 已生成 5 个防折叠变体');
+      return;
+    }
     case 'base64': result = encryptBase64(input); break;
     case 'caesar': result = encryptCaesar(input); break;
     case 'morse': result = encryptMorse(input); break;
     case 'hex': result = encryptHex(input); break;
     case 'reverse': result = encryptReverse(input); break;
-    case 'aes': result = encryptAES(input, password); break;
+    case 'aes': result = await encryptAES(input, password); break;
     default: result = encryptZeroMix(input, password);
   }
 
@@ -1147,36 +2105,25 @@ function doEncrypt() {
   // 智能伪装模式显示链接预览（将文案中的 URL 高亮显示）
   const sendBtn = document.getElementById('sendBtn');
   const htmlBtn = document.getElementById('htmlBtn');
-  const qrBtn = document.getElementById('qrBtn');
-  const qrSection = document.getElementById('qrSection');
-  const qrCode = document.getElementById('qrCode');
   if (currentMode === 'smart-camo' && userDomain && lastCamoUrl) {
     const preview = document.getElementById('outputPreview');
     const content = document.getElementById('previewContent');
     preview.classList.add('show');
-    content.innerHTML = '<div style="margin-bottom:8px;color:#059669;font-size:13px;">🔗 微信/抖音/小红书里会识别下方蓝色链接并可直接点击：</div>' + lastCamoSend.replace(lastCamoUrl, '<span style="color:#2563eb;text-decoration:underline;font-weight:600;">' + lastCamoUrl + '</span>');
+    const linkLabel = camoLinkType === 'qrcode' ? '🔗 点击文字会跳转到二维码图片（微信/抖音/小红书会识别下方蓝色链接）：' : '🔗 微信/抖音/小红书里会识别下方蓝色链接并可直接点击：';
+    content.innerHTML = '<div style="margin-bottom:8px;color:#059669;font-size:13px;">' + linkLabel + '</div>' + lastCamoSend.replace(lastCamoUrl, '<span style="color:#2563eb;text-decoration:underline;font-weight:600;">' + lastCamoUrl + '</span>');
     sendBtn.style.display = 'inline-flex';
     htmlBtn.style.display = 'inline-flex';
-    qrBtn.style.display = 'inline-flex';
-    qrSection.style.display = 'block';
-    try {
-      const qr = new QRCodeSVG({ content: lastCamoUrl, width: 200, height: 200, padding: 2, color: '#000000', background: '#ffffff', ecl: 'M' });
-      qrCode.innerHTML = qr.svg({ container: 'svg-viewbox' });
-    } catch(e) { qrCode.innerHTML = '二维码生成失败'; }
   } else {
     document.getElementById('outputPreview').classList.remove('show');
     document.getElementById('previewContent').innerHTML = '';
     sendBtn.style.display = 'none';
     htmlBtn.style.display = 'none';
-    qrBtn.style.display = 'none';
-    qrSection.style.display = 'none';
-    qrCode.innerHTML = '';
   }
   
   showToast('✅ 加密完成！');
 }
 
-function doDecrypt() {
+async function doDecrypt() {
   const input = document.getElementById('inputText').value;
   if (!input) {
     showToast('⚠️ 请先输入要解密的内容');
@@ -1191,12 +2138,13 @@ function doDecrypt() {
     case 'scatter': result = decryptScatter(input); break;
     case 'mixed': result = decryptMixed(input); break;
     case 'smart-camo': result = decryptSmartCamo(input); break;
+    case 'wechat-moment': result = '朋友圈防折叠模式不需要解密，请直接复制生成的变体文案。'; break;
     case 'base64': result = decryptBase64(input); break;
     case 'caesar': result = decryptCaesar(input); break;
     case 'morse': result = decryptMorse(input); break;
     case 'hex': result = decryptHex(input); break;
     case 'reverse': result = encryptReverse(input); break;
-    case 'aes': result = decryptZeroMix(input); break;
+    case 'aes': result = await decryptAES(input, getPassword() || ''); break;
     default: result = decryptZeroMix(input);
   }
 
@@ -1225,9 +2173,6 @@ function clearOutput() {
   document.getElementById('previewContent').innerHTML = '';
   document.getElementById('sendBtn').style.display = 'none';
   document.getElementById('htmlBtn').style.display = 'none';
-  document.getElementById('qrBtn').style.display = 'none';
-  document.getElementById('qrSection').style.display = 'none';
-  document.getElementById('qrCode').innerHTML = '';
   lastCamoUrl = '';
   lastCamoSend = '';
   updateCounts(); 
@@ -1246,32 +2191,13 @@ function copyOutput() {
 }
 
 function copyCamoHtml() {
-  if (!lastCamoUrl) return;
-  navigator.clipboard.writeText(lastCamoUrl).then(() => showToast('✅ 已复制链接'));
-}
-
-function downloadQRCode() {
-  const qrCode = document.getElementById('qrCode');
-  if (!qrCode || !qrCode.innerHTML) return;
-  const svg = qrCode.querySelector('svg');
-  if (!svg) return;
-  const serializer = new XMLSerializer();
-  const svgStr = serializer.serializeToString(svg);
-  const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'qrcode-text-encryptor.svg';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast('✅ 二维码已下载');
+  if (!lastCamoSend) return;
+  navigator.clipboard.writeText(lastCamoSend).then(() => showToast('✅ 已复制完整发送文案'));
 }
 
 function copySendVersion() {
-  if (!lastCamoSend) return;
-  navigator.clipboard.writeText(lastCamoSend).then(() => showToast('✅ 已复制发送版（含可点击链接的文案）'));
+  if (!lastCamoUrl) return;
+  navigator.clipboard.writeText(lastCamoUrl).then(() => showToast('✅ 已复制链接'));
 }
 
 function copyWechat() {
