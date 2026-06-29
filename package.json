@@ -40,24 +40,16 @@
           "arch": ["x64"]
         }
       ],
-      "icon": "icon.png",
-      "artifactName": "text-encryptor-v${version}-win-setup.${ext}"
+      "icon": "icon.png"
     },
     "mac": {
-      "target": [
-        {
-          "target": "dmg",
-          "artifactName": "text-encryptor-v${version}-mac-${arch}.${ext}"
-        },
-        {
-          "target": "zip",
-          "artifactName": "text-encryptor-v${version}-mac-${arch}.${ext}"
-        }
-      ],
+      "target": ["dmg", "zip"],
       "icon": "icon.png",
+      "artifactName": "text-encryptor-v${version}-mac-${arch}.${ext}",
       "category": "public.app-category.utilities"
     },
     "nsis": {
+      "artifactName": "text-encryptor-v${version}-win-setup.${ext}",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
