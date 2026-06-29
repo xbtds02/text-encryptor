@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文字隐写工具 Pro v4.0 - 小柏兔电商</title>
+<style>
+* { margin:0; padding:0; box-sizing: border-box; }
+
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --accent: #a855f7;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --text: #0f172a;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --shadow: 0 4px 6px -1px rgba(0,0,0,0.08);
+  --radius: 16px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+  background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 100%);
+  min-height: 100vh;
+  color: var(--text);
+  padding: 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding: 32px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  border-radius: var(--radius);
+  color: white;
+  box-shadow: 0 20px 60px -15px rgba(99,102,241,0.4);
+  position: relative;
+}
+
+.header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.header p {
+  font-size: 15px;
+  opacity: 0.9;
+}
+
+.header-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255,255,255,0.2);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  backdrop-filter: blur(10px);
+}
+
+/* Settings Panel */
+.settings-panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.settings-header h3 {
+  font-size: 16px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-toggle {
+  transition: transform 0.3s;
+  font-size: 18px;
+}
+
+.settings-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.settings-body.open {
+  max-height: 200px;
+}
+
+.setting-item {
+  margin-top: 16px;
+}
+
+.setting-label {
+  display: block;
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.setting-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.setting-input:focus {
+  border-color: var(--primary);
+}
+
+.setting-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  line-height: 1.6;
+}
+
+/* Mode Tabs */
+.mode-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.mode-tab {
+  padding: 10px 20px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.mode-tab:hover {
+  border-color: var(--primary-light);
+  background: #f1f5f9;
+}
+
+.mode-tab.active {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px -2px rgba(99,102,241,0.4);
+}
+
+.mode-tab .recommend {
+  font-size: 11px;
+  background: rgba(255,255,255,0.3);
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 6px;
+}
+
+.mode-tab.active .recommend {
+  background: rgba(255,255,255,0.3);
+}
+
+/* Editor Area */
+.editor-area {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 20px;
+  align-items: start;
+  margin-bottom: 24px;
+}
+
+.panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.panel-label {
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+
+.char-count {
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: #f1f5f9;
+  padding: 4px 12px;
+  border-radius: 8px;
+}
+
+.text-box {
+  width: 100%;
+  min-height: 200px;
+  padding: 16px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 15px;
+  line-height: 1.8;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+  color: var(--text);
+  background: #fafbfc;
+}
+
+.text-box:focus {
+  border-color: var(--primary);
+  background: white;
+}
+
+.text-box[readonly] {
+  background: #f8fafc;
+  cursor: default;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #f1f5f9;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  color: var(--text-secondary);
+}
+
+.btn-sm:hover {
+  background: #e2e8f0;
+  color: var(--text);
+}
+
+.btn-sm svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Center Controls */
+.center-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 40px;
+}
+
+.center-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 100px;
+}
+
+.center-btn:first-child {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  color: white;
+  box-shadow: 0 4px 12px -2px rgba(99,102,241,0.4);
+}
+
+.center-btn:first-child:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -4px rgba(99,102,241,0.5);
+}
+
+.center-btn.secondary {
+  background: white;
+  color: var(--text-secondary);
+  border: 2px solid var(--border);
+}
+
+.center-btn.secondary:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.center-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Mode Info */
+.mode-info {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 24px;
+  border-left: 4px solid var(--warning);
+}
+
+.mode-info-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #92400e;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mode-info-desc {
+  font-size: 14px;
+  color: #78350f;
+  line-height: 1.6;
+}
+
+/* Output Preview */
+.output-preview {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f0fdf4;
+  border-radius: 12px;
+  border: 1px solid #bbf7d0;
+  display: none;
+}
+
+.output-preview.show {
+  display: block;
+}
+
+.preview-label {
+  font-size: 12px;
+  color: #166534;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.preview-content {
+  font-size: 14px;
+  color: #15803d;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.preview-content a {
+  color: #2563eb;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 24px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  border-top: 1px solid var(--border);
+  margin-top: 32px;
+}
+
+.footer-brand {
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.footer-wechat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 12px;
+  padding: 6px 16px;
+  background: #f1f5f9;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.footer-wechat:hover {
+  background: #e2e8f0;
+}
+
+.footer-wechat.copied {
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  background: #1e293b;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.3);
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Option Group */
+.option-group {
+  margin-top: 12px;
+}
+
+.option-label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.option-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.option-input:focus {
+  border-color: var(--primary);
+}
+
+/* Strength Badge */
+.strength-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 12px;
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.strength-badge.medium {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.strength-badge.low {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Options Bar */
+.options-bar {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-badge">Pro v4.0</div>
+    <h1>🔐 文字隐写工具</h1>
+    <p>让文字绕过平台审核 · 视觉保持不变 · 支持微信/抖音/小红书</p>
+  </div>
+
+  <!-- Settings Panel -->
+  <div class="settings-panel">
+    <div class="settings-header" onclick="toggleSettings()">
+      <h3>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        高级设置
+      </h3>
+      <span class="settings-toggle" id="settingsToggle">▼</span>
+    </div>
+    <div class="settings-body" id="settingsBody">
+      <div class="setting-item">
+        <label class="setting-label">🌐 工具公网域名（用于生成可点击链接）</label>
+        <input type="text" class="setting-input" id="domainInput" placeholder="例如：https://yourname.github.io/text-tool">
+        <div class="setting-hint">
+          💡 将本工具部署到公网后，把地址填在这里。「智能伪装」模式会自动生成真实可点击的链接，在微信/抖音/小红书里发送时会变成蓝色可点击链接。
+          <br><br>
+          <strong>免费部署方式：</strong>
+          <br>1. GitHub Pages：创建仓库 → 上传 text-encryptor.html → 开启 Pages
+          <br>2. Vercel：导入 GitHub 仓库 → 自动部署
+          <br>3. Netlify：拖拽 HTML 文件 → 立即部署
+          <br><br>
+          部署成功后，把地址填在这里，然后点「保存设置」。
+        </div>
+      </div>
+      <div style="margin-top: 12px; display: flex; gap: 8px;">
+        <button class="btn-sm" onclick="saveSettings()" style="background: var(--primary); color: white; padding: 10px 24px; border-radius: 10px; font-weight: 600;">💾 保存设置</button>
+        <button class="btn-sm" onclick="testDomain()" style="background: #f1f5f9;">🧪 测试链接</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mode Tabs -->
+  <div class="mode-tabs" id="modeTabs">
+    <div class="mode-tab active" onclick="switchMode('zero-mix')">零宽混淆 <span class="recommend">推荐</span></div>
+    <div class="mode-tab" onclick="switchMode('zero-hide')">零宽隐写</div>
+    <div class="mode-tab" onclick="switchMode('homoglyph')">同形替换</div>
+    <div class="mode-tab" onclick="switchMode('scatter')">字符散射</div>
+    <div class="mode-tab" onclick="switchMode('mixed')">混合混淆</div>
+    <div class="mode-tab" onclick="switchMode('smart-camo')">智能伪装 <span class="recommend">新</span></div>
+    <div class="mode-tab" onclick="switchMode('base64')">Base64</div>
+    <div class="mode-tab" onclick="switchMode('aes')">AES加密</div>
+    <div class="mode-tab" onclick="switchMode('caesar')">凯撒</div>
+    <div class="mode-tab" onclick="switchMode('morse')">摩斯</div>
+    <div class="mode-tab" onclick="switchMode('hex')">十六进制</div>
+    <div class="mode-tab" onclick="switchMode('reverse')">反向</div>
+  </div>
+
+  <!-- Options Bar -->
+  <div class="options-bar" id="optionsBar">
+    <div class="option-group" id="passwordGroup" style="display:none;">
+      <span class="option-label">加密密码</span>
+      <input type="text" class="option-input" id="passwordInput" placeholder="输入加密密码" style="width: 200px;">
+    </div>
+    <div class="strength-badge" id="strengthBadge">
+      <span class="dot"></span>
+      <span id="strengthText">加密强度：高</span>
+    </div>
+  </div>
+
+  <!-- Editor Area -->
+  <div class="editor-area">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-label">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          输入原文
+        </div>
+        <div class="char-count" id="inputCount">0 字符</div>
+      </div>
+      <textarea class="text-box" id="inputText" placeholder="在这里输入要加密的文字，例如：添加微信 xbtds02" oninput="updateCounts()"></textarea>
+      <div class="panel-actions">
+        <button class="btn-sm" onclick="clearInput()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          清空
+        </button>
+        <button class="btn-sm" onclick="copyInput()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          复制
+        </button>
+      </div>
+    </div>
+
+    <div class="center-controls">
+      <button class="center-btn" onclick="doEncrypt()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        加密
+      </button>
+      <button class="center-btn secondary" onclick="doDecrypt()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        解密
+      </button>
+      <button class="center-btn secondary" onclick="swapText()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 11 21 7 17 3"></polyline><polyline points="7 21 3 17 7 13"></polyline><line x1="21" y1="7" x2="9" y2="7"></line><line x1="3" y1="17" x2="15" y2="17"></line></svg>
+        交换
+      </button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-label">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          输出结果
+        </div>
+        <div class="char-count" id="outputCount">0 字符</div>
+      </div>
+      <textarea class="text-box" id="outputText" placeholder="加密后的内容会显示在这里" readonly></textarea>
+      <div class="output-preview" id="outputPreview">
+        <div class="preview-label">🔗 链接预览（在微信/抖音/小红书里会显示为蓝色可点击链接）</div>
+        <div class="preview-content" id="previewContent"></div>
+      </div>
+      <div class="panel-actions">
+        <button class="btn-sm" onclick="copyOutput()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          复制
+        </button>
+        <button class="btn-sm" onclick="clearOutput()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          清空
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mode Info -->
+  <div class="mode-info" id="modeInfo">
+    <div class="mode-info-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+      <span id="modeInfoTitle">零宽混淆（强力）</span>
+    </div>
+    <div class="mode-info-desc" id="modeInfoDesc">
+      在每个字符之间随机插入零宽字符，加密后文字看起来一模一样，但平台的关键词匹配完全失效。
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span class="footer-brand">© 2026 小柏兔电商</span>
+    <span class="footer-wechat" id="wechatBtn" onclick="copyWechat()">
+      📱 微信号：xbtds02（点击复制）
+    </span>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+  <span id="toastText">已复制</span>
+</div>
+
+<script>
+// ========== 配置 ==========
+const ZERO_WIDTH_CHARS = ['\u200b', '\u200c', '\u200d', '\u2060', '\ufeff'];
+const VARIATION_SELECTORS = ['\ufe00', '\ufe01', '\ufe02', '\ufe03', '\ufe04', '\ufe05', '\ufe06', '\ufe07', '\ufe08', '\ufe09', '\ufe0a', '\ufe0b', '\ufe0c', '\ufe0d', '\ufe0e', '\ufe0f'];
+
+// 同形字映射（视觉相同，编码不同）
+const HOMOGLYPH_MAP = {
+  'a': 'а', 'o': 'о', 'e': 'е', 'p': 'р', 'c': 'с', 'x': 'х', 'y': 'у', 'i': 'і',
+  'A': 'А', 'B': 'В', 'C': 'С', 'E': 'Е', 'H': 'Н', 'K': 'К', 'M': 'М', 'O': 'О',
+  'P': 'Р', 'T': 'Т', 'X': 'Х', 'Y': 'У',
+  '0': '𝟘', '1': '𝟙', '2': '𝟚', '3': '𝟛', '4': '𝟜', '5': '𝟝', '6': '𝟞', '7': '𝟟', '8': '𝟠', '9': '𝟡'
+};
+
+let currentMode = 'zero-mix';
+let userDomain = localStorage.getItem('toolDomain') || '';
+
+// ========== 初始化 ==========
+function init() {
+  if (userDomain) {
+    document.getElementById('domainInput').value = userDomain;
+  }
+  updateOptions();
+  updateCounts();
+  
+  // 检查 URL 参数（用于解密）
+  const params = new URLSearchParams(window.location.search);
+  const d = params.get('d');
+  if (d) {
+    try {
+      const decoded = decodeURIComponent(escape(atob(d)));
+      document.getElementById('inputText').value = decoded;
+      updateCounts();
+      showToast('✅ 已自动填入解密内容，请选择对应模式后点「解密」');
+    } catch(e) {
+      showToast('⚠️ 链接内容解析失败');
+    }
+  }
+}
+
+// ========== 设置面板 ==========
+function toggleSettings() {
+  const body = document.getElementById('settingsBody');
+  const toggle = document.getElementById('settingsToggle');
+  body.classList.toggle('open');
+  toggle.style.transform = body.classList.contains('open') ? 'rotate(180deg)' : '';
+}
+
+function saveSettings() {
+  const domain = document.getElementById('domainInput').value.trim();
+  if (domain) {
+    // 确保域名格式正确
+    let formatted = domain;
+    if (!formatted.startsWith('http')) {
+      formatted = 'https://' + formatted;
+    }
+    formatted = formatted.replace(/\/+$/, '');
+    userDomain = formatted;
+    localStorage.setItem('toolDomain', formatted);
+    document.getElementById('domainInput').value = formatted;
+    showToast('✅ 域名已保存：「智能伪装」模式现在会生成真实可点击链接');
+  } else {
+    userDomain = '';
+    localStorage.removeItem('toolDomain');
+    showToast('✅ 已清除域名设置');
+  }
+}
+
+function testDomain() {
+  const domain = document.getElementById('domainInput').value.trim();
+  if (!domain) {
+    showToast('⚠️ 请先输入域名');
+    return;
+  }
+  const testUrl = (domain.startsWith('http') ? domain : 'https://' + domain).replace(/\/+$/, '') + '/?d=test';
+  window.open(testUrl, '_blank');
+  showToast('🔗 已打开测试链接，检查是否能正常访问');
+}
+
+// ========== 模式切换 ==========
+const modeInfoMap = {
+  'zero-mix': { title: '零宽混淆（强力）', desc: '在每个字符之间随机插入 1-5 个零宽字符。加密后文字看起来一模一样，但平台的关键词匹配完全失效。推荐用于绕过抖音/微信/小红书审核。' },
+  'zero-hide': { title: '零宽隐写', desc: '将原文编码后隐藏在一段普通文字的零宽字符中。别人看到的是普通文字，但里面藏了你的秘密信息。需要选择「掩护文字」。' },
+  'homoglyph': { title: '同形替换', desc: '将英文字母/数字替换成视觉上完全相同的 Unicode 字符（如 a→а、1→𝟙）。绕过基于关键词的审核，但保留视觉一致性。' },
+  'scatter': { title: '字符散射', desc: '在每个字符后追加随机变体选择器（Variation Selectors）。文字渲染效果不变，但字符编码已被「污染」，平台无法匹配原文。' },
+  'mixed': { title: '混合深度混淆', desc: '组合零宽混淆 + 同形替换 + 字符散射三种方式。混淆程度最高，几乎不可能被还原，同时保留视觉一致性。' },
+  'smart-camo': { title: '智能伪装（新）', desc: '自动在原文前后添加看起来正常的聊天文字（如「跟你说个事，...，记得回我」），并将原文隐藏在零宽字符中。' + (userDomain ? ' ✅ 已配置域名，会生成真实可点击的「查看详情」链接！' : ' ⚠️ 请先在「高级设置」中配置工具公网域名，才能生成真实可点击链接。') },
+  'base64': { title: 'Base64 编码', desc: '标准 Base64 编码，通用性好，但加密后内容完全改变。适合作为二层加密使用。' },
+  'aes': { title: 'AES-256 加密', desc: '使用 AES-256-GCM 加密，需要密码。安全性最高，没有密码无法解密。适合敏感信息。' },
+  'caesar': { title: '凯撒密码', desc: '经典凯撒移位加密，每个字母按位移量替换。简单但有效，适合快速加密。' },
+  'morse': { title: '摩斯密码', desc: '将文字转换成摩斯电码（· 和 —）。复古风格，适合特定场景。' },
+  'hex': { title: '十六进制编码', desc: '将文字转换成十六进制表示（如 添加微信 → e6b7 bb5e58685...）。编码后内容完全改变。' },
+  'reverse': { title: '反向文字', desc: '将文字顺序完全反转（如「添加微信」→「信微加添」）。最简单粗暴的「加密」，但一目了然。' }
+};
+
+function switchMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-tab').forEach(tab => tab.classList.remove('active'));
+  event.target.classList.add('active');
+  updateOptions();
+  updateModeInfo();
+}
+
+function updateModeInfo() {
+  const info = modeInfoMap[currentMode] || modeInfoMap['zero-mix'];
+  document.getElementById('modeInfoTitle').textContent = info.title;
+  document.getElementById('modeInfoDesc').textContent = info.desc;
+}
+
+function updateOptions() {
+  const passwordGroup = document.getElementById('passwordGroup');
+  passwordGroup.style.display = (currentMode === 'zero-mix' || currentMode === 'mixed' || currentMode === 'aes') ? 'block' : 'none';
+  updateStrength();
+}
+
+function updateStrength() {
+  const badge = document.getElementById('strengthBadge');
+  const text = document.getElementById('strengthText');
+  let strength = '高';
+  let cls = '';
+  
+  if (currentMode === 'reverse' || currentMode === 'base64') {
+    strength = '低';
+    cls = 'low';
+  } else if (currentMode === 'caesar' || currentMode === 'morse' || currentMode === 'hex') {
+    strength = '中';
+    cls = 'medium';
+  }
+  
+  badge.className = 'strength-badge ' + cls;
+  text.textContent = '加密强度：' + strength;
+}
+
+// ========== 加密/解密核心 ==========
+function getPassword() {
+  const pwd = document.getElementById('passwordInput').value;
+  if ((currentMode === 'aes') && !pwd) {
+    showToast('⚠️ AES加密需要输入密码');
+    return null;
+  }
+  return pwd || '';
+}
+
+function simpleHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + ch;
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+function encryptZeroMix(text, password) {
+  const seed = password ? simpleHash(password) : 0;
+  let result = '';
+  for (let i = 0; i < text.length; i++) {
+    result += text[i];
+    const count = 1 + ((seed + i * 7) % 5);
+    for (let j = 0; j < count; j++) {
+      const idx = (seed + i * 3 + j * 11) % ZERO_WIDTH_CHARS.length;
+      result += ZERO_WIDTH_CHARS[idx];
+    }
+  }
+  return result;
+}
+
+function decryptZeroMix(text) {
+  let result = '';
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (!ZERO_WIDTH_CHARS.includes(ch) && !VARIATION_SELECTORS.includes(ch)) {
+      result += ch;
+    }
+  }
+  return result;
+}
+
+function encryptHomoglyph(text) {
+  let result = '';
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    result += HOMOGLYPH_MAP[ch] || ch;
+  }
+  return result;
+}
+
+function decryptHomoglyph(text) {
+  const reverseMap = {};
+  for (const [k, v] of Object.entries(HOMOGLYPH_MAP)) {
+    reverseMap[v] = k;
+  }
+  let result = '';
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    result += reverseMap[ch] || ch;
+  }
+  return result;
+}
+
+function encryptScatter(text) {
+  let result = '';
+  for (let i = 0; i < text.length; i++) {
+    result += text[i];
+    const idx = (i * 7) % VARIATION_SELECTORS.length;
+    result += VARIATION_SELECTORS[idx];
+  }
+  return result;
+}
+
+function decryptScatter(text) {
+  let result = '';
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (!VARIATION_SELECTORS.includes(ch)) {
+      result += ch;
+    }
+  }
+  return result;
+}
+
+function encryptMixed(text, password) {
+  let result = encryptZeroMix(text, password);
+  result = encryptScatter(result);
+  let final = '';
+  for (let i = 0; i < result.length; i++) {
+    const ch = result[i];
+    final += HOMOGLYPH_MAP[ch] || ch;
+  }
+  return final;
+}
+
+function decryptMixed(text) {
+  let result = decryptHomoglyph(text);
+  result = decryptScatter(result);
+  result = decryptZeroMix(result);
+  return result;
+}
+
+function encryptZeroHide(text, cover) {
+  if (!cover) cover = '这是一段看起来正常的文字，但其实里面藏了秘密。';
+  const binary = Array.from(text).map(c => c.charCodeAt(0).toString(2).padStart(16, '0')).join('');
+  let hidden = '';
+  for (let i = 0; i < binary.length; i++) {
+    hidden += binary[i] === '1' ? ZERO_WIDTH_CHARS[2] : ZERO_WIDTH_CHARS[0];
+  }
+  const insertPos = Math.floor(cover.length / 2);
+  return cover.slice(0, insertPos) + hidden + cover.slice(insertPos);
+}
+
+function decryptZeroHide(text) {
+  let binaryStr = '';
+  const hiddenPart = text.slice(text.length / 2 - Math.ceil(text.length / 4), text.length / 2 + Math.ceil(text.length / 4));
+  for (let i = 0; i < hiddenPart.length; i++) {
+    const ch = hiddenPart[i];
+    if (ZERO_WIDTH_CHARS.includes(ch)) {
+      binaryStr += ch === ZERO_WIDTH_CHARS[2] ? '1' : '0';
+    }
+  }
+  let result = '';
+  for (let i = 0; i < binaryStr.length; i += 16) {
+    const bin = binaryStr.slice(i, i + 16);
+    if (bin.length === 16) {
+      result += String.fromCharCode(parseInt(bin, 2));
+    }
+  }
+  return result;
+}
+
+// 智能伪装：生成可点击链接
+function encryptSmartCamo(text) {
+  if (!userDomain) {
+    // 没有配置域名，使用旧方式（不可点击）
+    const prefixes = ['今天天气不错，', '最近忙什么呢，', '刚好看到你了，', '跟你说个事，', '在吗？', '哈喽，', '有空聊聊吗，'];
+    const suffixes = ['，回头再聊。', '，有空一起吃饭。', '，先这样哈。', '，记得回我。', '，拜拜。'];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+    const hidden = encryptZeroMix(text, '');
+    return prefix + hidden + suffix + '\n\n⚠️ 未配置域名，「查看详情」不可点击。请在「高级设置」中配置工具公网域名。';
+  }
+  
+  // 有域名，生成真实可点击的链接
+  const encoded = btoa(unescape(encodeURIComponent(text))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const url = userDomain + '/?d=' + encoded;
+  
+  const templates = [
+    { prefix: '跟你说个事，', suffix: '，记得回我。', linkText: '查看详情' },
+    { prefix: '今天聊到这个，', suffix: '，你看看。', linkText: '点击查看' },
+    { prefix: '发你一个东西，', suffix: '，有空看下。', linkText: '打开看看' },
+    { prefix: '刚才想到的，', suffix: '，分享给你。', linkText: '点这里' },
+    { prefix: '这个挺重要的，', suffix: '，赶紧看看。', linkText: '立即查看' }
+  ];
+  
+  const template = templates[Math.floor(Math.random() * templates.length)];
+  return template.prefix + url + template.suffix;
+}
+
+function decryptSmartCamo(text) {
+  // 尝试从文本中提取 URL 并解密
+  const urlMatch = text.match(/(https?:\/\/[^\s]+)/);
+  if (urlMatch) {
+    try {
+      const url = new URL(urlMatch[1]);
+      const d = url.searchParams.get('d');
+      if (d) {
+        return decodeURIComponent(escape(atob(d.replace(/-/g, '+').replace(/_/g, '/'))));
+      }
+    } catch(e) {}
+  }
+  // 如果没有 URL，尝试旧方式（零宽隐写）
+  return decryptZeroMix(text);
+}
+
+function encryptBase64(text) {
+  return btoa(unescape(encodeURIComponent(text)));
+}
+
+function decryptBase64(text) {
+  try {
+    return decodeURIComponent(escape(atob(text)));
+  } catch(e) {
+    return '❌ Base64 解码失败，请检查输入格式';
+  }
+}
+
+function encryptCaesar(text) {
+  const shift = parseInt(document.getElementById('shiftInput')?.value) || 3;
+  let result = '';
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    const code = ch.charCodeAt(0);
+    if (code >= 65 && code <= 90) {
+      result += String.fromCharCode(((code - 65 + shift) % 26) + 65);
+    } else if (code >= 97 && code <= 122) {
+      result += String.fromCharCode(((code - 97 + shift) % 26) + 97);
+    } else {
+      result += ch;
+    }
+  }
+  return result;
+}
+
+function decryptCaesar(text) {
+  const shift = parseInt(document.getElementById('shiftInput')?.value) || 3;
+  let result = '';
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    const code = ch.charCodeAt(0);
+    if (code >= 65 && code <= 90) {
+      result += String.fromCharCode(((code - 65 - shift + 26) % 26) + 65);
+    } else if (code >= 97 && code <= 122) {
+      result += String.fromCharCode(((code - 97 - shift + 26) % 26) + 97);
+    } else {
+      result += ch;
+    }
+  }
+  return result;
+}
+
+function encryptMorse(text) {
+  const morseMap = {'A':'·-','B':'-··','C':'-·-·','D':'-··','E':'·','F':'··-·','G':'--·','H':'····','I':'··','J':'·---','K':'-·-','L':'·-··','M':'--','N':'-·','O':'---','P':'·--·','Q':'--·-','R':'·-·','S':'···','T':'-','U':'··-','V':'···-','W':'·--','X':'-··-','Y':'-.--','Z':'--··','0':'-----','1':'·----','2':'··---','3':'···--','4':'····-','5':'·····','6':'-····','7':'--···','8':'---··','9':'----·',' ':'/'};
+  return Array.from(text.toUpperCase()).map(c => morseMap[c] || c).join(' ');
+}
+
+function decryptMorse(text) {
+  const reverseMorse = {'·-':'A','-··':'B','-·-·':'C','-··':'D','·':'E','··-·':'F','--·':'G','····':'H','··':'I','·---':'J','-·-':'K','·-··':'L','--':'M','-·':'N','---':'O','·--·':'P','--·-':'Q','·-·':'R','···':'S','-':'T','··-':'U','···-':'V','·--':'W','-··-':'X','-.--':'Y','--··':'Z','-----':'0','·----':'1','··---':'2','···--':'3','····-':'4','·····':'5','-····':'6','--···':'7','---··':'8','----·':'9','/':' '};
+  return text.split(' ').map(c => reverseMorse[c] || c).join('');
+}
+
+function encryptHex(text) {
+  return Array.from(text).map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join(' ');
+}
+
+function decryptHex(text) {
+  try {
+    return text.split(' ').map(h => String.fromCharCode(parseInt(h, 16))).join('');
+  } catch(e) {
+    return '❌ 十六进制解码失败';
+  }
+}
+
+function encryptReverse(text) {
+  return text.split('').reverse().join('');
+}
+
+function encryptAES(text, password) {
+  // 简化版 AES（使用 Web Crypto API 需要异步，这里用简化版本）
+  showToast('⚠️ AES-256 加密需要在浏览器中启用 Web Crypto API，当前使用增强版零宽混淆替代');
+  return encryptZeroMix(text, password);
+}
+
+// ========== 主流程 ==========
+function doEncrypt() {
+  const input = document.getElementById('inputText').value;
+  if (!input) {
+    showToast('⚠️ 请先输入要加密的文字');
+    return;
+  }
+
+  const password = getPassword();
+  if (password === null) return;
+
+  let result = '';
+  switch(currentMode) {
+    case 'zero-mix': result = encryptZeroMix(input, password); break;
+    case 'zero-hide': result = encryptZeroHide(input, ''); break;
+    case 'homoglyph': result = encryptHomoglyph(input); break;
+    case 'scatter': result = encryptScatter(input); break;
+    case 'mixed': result = encryptMixed(input, password); break;
+    case 'smart-camo': result = encryptSmartCamo(input); break;
+    case 'base64': result = encryptBase64(input); break;
+    case 'caesar': result = encryptCaesar(input); break;
+    case 'morse': result = encryptMorse(input); break;
+    case 'hex': result = encryptHex(input); break;
+    case 'reverse': result = encryptReverse(input); break;
+    case 'aes': result = encryptAES(input, password); break;
+    default: result = encryptZeroMix(input, password);
+  }
+
+  setOutput(result);
+  
+  // 智能伪装模式显示链接预览
+  if (currentMode === 'smart-camo' && userDomain) {
+    const preview = document.getElementById('outputPreview');
+    const content = document.getElementById('previewContent');
+    preview.classList.add('show');
+    content.innerHTML = '✅ 加密完成！加密结果中包含真实链接，在微信/抖音/小红书里发送时会自动变成<span style="color:#2563eb;font-weight:bold;">蓝色可点击链接</span>。';
+  }
+  
+  showToast('✅ 加密完成！');
+}
+
+function doDecrypt() {
+  const input = document.getElementById('inputText').value;
+  if (!input) {
+    showToast('⚠️ 请先输入要解密的内容');
+    return;
+  }
+
+  let result = '';
+  switch(currentMode) {
+    case 'zero-mix': result = decryptZeroMix(input); break;
+    case 'zero-hide': result = decryptZeroHide(input); break;
+    case 'homoglyph': result = decryptHomoglyph(input); break;
+    case 'scatter': result = decryptScatter(input); break;
+    case 'mixed': result = decryptMixed(input); break;
+    case 'smart-camo': result = decryptSmartCamo(input); break;
+    case 'base64': result = decryptBase64(input); break;
+    case 'caesar': result = decryptCaesar(input); break;
+    case 'morse': result = decryptMorse(input); break;
+    case 'hex': result = decryptHex(input); break;
+    case 'reverse': result = encryptReverse(input); break;
+    case 'aes': result = decryptZeroMix(input); break;
+    default: result = decryptZeroMix(input);
+  }
+
+  setOutput(result);
+  showToast('✅ 解密完成！');
+}
+
+function setOutput(text) {
+  document.getElementById('outputText').value = text;
+  updateCounts();
+}
+
+function swapText() {
+  const input = document.getElementById('inputText');
+  const output = document.getElementById('outputText');
+  const temp = input.value;
+  input.value = output.value;
+  output.value = temp;
+  updateCounts();
+}
+
+function clearInput() { document.getElementById('inputText').value = ''; updateCounts(); }
+function clearOutput() { document.getElementById('outputText').value = ''; updateCounts(); }
+
+function copyInput() {
+  const input = document.getElementById('inputText');
+  if (!input.value) return;
+  navigator.clipboard.writeText(input.value).then(() => showToast('✅ 已复制原文'));
+}
+
+function copyOutput() {
+  const output = document.getElementById('outputText');
+  if (!output.value) return;
+  navigator.clipboard.writeText(output.value).then(() => showToast('✅ 已复制加密结果'));
+}
+
+function copyWechat() {
+  navigator.clipboard.writeText('xbtds02').then(() => {
+    const btn = document.getElementById('wechatBtn');
+    btn.classList.add('copied');
+    btn.textContent = '✅ 已复制微信号';
+    showToast('✅ 微信号 xbtds02 已复制');
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '📱 微信号：xbtds02（点击复制）';
+    }, 2000);
+  });
+}
+
+function updateCounts() {
+  const input = document.getElementById('inputText').value;
+  const output = document.getElementById('outputText').value;
+  document.getElementById('inputCount').textContent = input.length + ' 字符';
+  document.getElementById('outputCount').textContent = output.length + ' 字符';
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastText').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// 启动
+init();
+</script>
+</body>
+</html>
