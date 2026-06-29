@@ -1,17 +1,62 @@
 {
   "name": "text-encryptor",
-  "version": "1.0.0",
-  "description": "文字隐写工具 - Android 安装版",
-  "main": "index.html",
+  "version": "1.0.2",
+  "description": "文字隐写工具 - 跨平台桌面版与 Android 安装版",
+  "main": "main.js",
   "scripts": {
     "build": "npx cap copy android && cd android && ./gradlew assembleDebug",
-    "android": "npx cap run android"
+    "android": "npx cap run android",
+    "electron:start": "electron .",
+    "electron:build": "electron-builder",
+    "electron:build:win": "electron-builder --win",
+    "electron:build:mac": "electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.xbtds02.textencryptor",
+    "productName": "文字隐写工具",
+    "copyright": "© 2026 小柏兔电商",
+    "directories": {
+      "output": "dist-desktop"
+    },
+    "files": [
+      "main.js",
+      "index.html",
+      "manifest.json",
+      "service-worker.js",
+      "icon.png"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "icon.png"
+    },
+    "mac": {
+      "target": ["dmg", "zip"],
+      "icon": "icon.png",
+      "category": "public.app-category.utilities"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   },
   "dependencies": {
     "@capacitor/android": "^7.0.0",
     "@capacitor/core": "^7.0.0"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.0.0"
+    "@capacitor/cli": "^7.0.0",
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0"
   }
 }
