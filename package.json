@@ -1,0 +1,17 @@
+{
+  "name": "text-encryptor",
+  "version": "1.0.0",
+  "description": "文字隐写工具 - Android 安装版",
+  "main": "index.html",
+  "scripts": {
+    "build": "npx cap copy android && cd android && ./gradlew assembleDebug",
+    "android": "npx cap run android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
+  }
+}
