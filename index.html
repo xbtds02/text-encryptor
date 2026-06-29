@@ -661,6 +661,14 @@ body {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
           复制
         </button>
+        <button class="btn-sm" onclick="copyCamoHtml()" id="htmlBtn" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+          复制HTML
+        </button>
+        <button class="btn-sm" onclick="copySendVersion()" id="sendBtn" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+          复制发送版
+        </button>
         <button class="btn-sm" onclick="clearOutput()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
           清空
@@ -710,6 +718,9 @@ const HOMOGLYPH_MAP = {
 
 let currentMode = 'zero-mix';
 let userDomain = localStorage.getItem('toolDomain') || 'https://1484171726.github.io/text-encryptor/';
+let lastCamoHtml = '';
+let lastCamoUrl = '';
+let lastCamoSend = '';
 
 // ========== 初始化 ==========
 function init() {
@@ -967,6 +978,9 @@ function decryptZeroHide(text) {
 function encryptSmartCamo(text) {
   if (!userDomain) {
     // 没有配置域名，使用旧方式（不可点击）
+    lastCamoHtml = '';
+    lastCamoUrl = '';
+    lastCamoSend = '';
     const prefixes = ['今天天气不错，', '最近忙什么呢，', '刚好看到你了，', '跟你说个事，', '在吗？', '哈喽，', '有空聊聊吗，'];
     const suffixes = ['，回头再聊。', '，有空一起吃饭。', '，先这样哈。', '，记得回我。', '，拜拜。'];
     const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
@@ -975,9 +989,10 @@ function encryptSmartCamo(text) {
     return prefix + hidden + suffix + '\n\n⚠️ 未配置域名，「查看详情」不可点击。请在「高级设置」中配置工具公网域名。';
   }
   
-  // 有域名，生成真实可点击的链接
+  // 有域名，生成真实可点击的链接（链接文字为「查看详情/点击查看」等）
   const encoded = btoa(unescape(encodeURIComponent(text))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const url = userDomain.replace(/\/$/, '') + '/?d=' + encoded;
+  lastCamoUrl = url;
   
   const templates = [
     { prefix: '跟你说个事，', suffix: '，记得回我。', linkText: '查看详情' },
@@ -988,21 +1003,34 @@ function encryptSmartCamo(text) {
   ];
   
   const template = templates[Math.floor(Math.random() * templates.length)];
-  return template.prefix + url + template.suffix;
+  // 存储 HTML 版本和发送版，返回给 textarea 的是纯文字版本
+  lastCamoHtml = template.prefix + '<a href="' + url + '" target="_blank" style="color:#2563eb;text-decoration:underline;font-weight:600;">' + template.linkText + '</a>' + template.suffix;
+  lastCamoSend = template.prefix + template.linkText + '：' + url + template.suffix;
+  return template.prefix + template.linkText + template.suffix;
 }
 
 function decryptSmartCamo(text) {
-  // 尝试从文本中提取 URL 并解密
-  const urlMatch = text.match(/(https?:\/\/[^\s]+)/);
-  if (urlMatch) {
-    try {
-      const url = new URL(urlMatch[1]);
-      const d = url.searchParams.get('d');
-      if (d) {
-        return decodeURIComponent(escape(atob(d.replace(/-/g, '+').replace(/_/g, '/'))));
-      }
-    } catch(e) {}
+  // 尝试从文本或 HTML 中提取 URL 并解密
+  let urlText = text;
+  
+  // 先从 <a href="..."> 中提取
+  const hrefMatch = text.match(/href=["'](https?:\/\/[^"']+)["']/);
+  if (hrefMatch) {
+    urlText = hrefMatch[1];
+  } else {
+    // 否则直接匹配文本中的 URL
+    const urlMatch = text.match(/(https?:\/\/[^\s]+)/);
+    if (urlMatch) urlText = urlMatch[1];
   }
+  
+  try {
+    const url = new URL(urlText);
+    const d = url.searchParams.get('d');
+    if (d) {
+      return decodeURIComponent(escape(atob(d.replace(/-/g, '+').replace(/_/g, '/'))));
+    }
+  } catch(e) {}
+  
   // 如果没有 URL，尝试旧方式（零宽隐写）
   return decryptZeroMix(text);
 }
@@ -1115,12 +1143,21 @@ function doEncrypt() {
 
   setOutput(result);
   
-  // 智能伪装模式显示链接预览
+  // 智能伪装模式显示链接预览（渲染为可点击文字链接）
+  const sendBtn = document.getElementById('sendBtn');
+  const htmlBtn = document.getElementById('htmlBtn');
   if (currentMode === 'smart-camo' && userDomain) {
     const preview = document.getElementById('outputPreview');
     const content = document.getElementById('previewContent');
     preview.classList.add('show');
-    content.innerHTML = '✅ 加密完成！加密结果中包含真实链接，在微信/抖音/小红书里发送时会自动变成<span style="color:#2563eb;font-weight:bold;">蓝色可点击链接</span>。';
+    content.innerHTML = '<div style="margin-bottom:8px;color:#059669;font-size:13px;">🔗 以下是在网页/支持 HTML 的地方显示的效果，「' + (lastCamoHtml.match(/>([^<]+)</)?.[1] || '查看详情') + '」会显示为蓝色可点击文字：</div>' + lastCamoHtml;
+    sendBtn.style.display = 'inline-flex';
+    htmlBtn.style.display = 'inline-flex';
+  } else {
+    document.getElementById('outputPreview').classList.remove('show');
+    document.getElementById('previewContent').innerHTML = '';
+    sendBtn.style.display = 'none';
+    htmlBtn.style.display = 'none';
   }
   
   showToast('✅ 加密完成！');
@@ -1169,7 +1206,17 @@ function swapText() {
 }
 
 function clearInput() { document.getElementById('inputText').value = ''; updateCounts(); }
-function clearOutput() { document.getElementById('outputText').value = ''; updateCounts(); }
+function clearOutput() { 
+  document.getElementById('outputText').value = ''; 
+  document.getElementById('outputPreview').classList.remove('show');
+  document.getElementById('previewContent').innerHTML = '';
+  document.getElementById('sendBtn').style.display = 'none';
+  document.getElementById('htmlBtn').style.display = 'none';
+  lastCamoHtml = '';
+  lastCamoUrl = '';
+  lastCamoSend = '';
+  updateCounts(); 
+}
 
 function copyInput() {
   const input = document.getElementById('inputText');
@@ -1180,7 +1227,17 @@ function copyInput() {
 function copyOutput() {
   const output = document.getElementById('outputText');
   if (!output.value) return;
-  navigator.clipboard.writeText(output.value).then(() => showToast('✅ 已复制加密结果'));
+  navigator.clipboard.writeText(output.value).then(() => showToast(currentMode === 'smart-camo' ? '✅ 已复制文字内容' : '✅ 已复制加密结果'));
+}
+
+function copyCamoHtml() {
+  if (!lastCamoHtml) return;
+  navigator.clipboard.writeText(lastCamoHtml).then(() => showToast('✅ 已复制 HTML 链接（可粘贴到支持 HTML 的地方）'));
+}
+
+function copySendVersion() {
+  if (!lastCamoSend) return;
+  navigator.clipboard.writeText(lastCamoSend).then(() => showToast('✅ 已复制发送版（微信/抖音/小红书可直接点开链接）'));
 }
 
 function copyWechat() {
