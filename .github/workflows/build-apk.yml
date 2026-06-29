@@ -29,8 +29,8 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Capacitor
-        run: npm install -g @capacitor/cli @capacitor/core @capacitor/android
+      - name: Install dependencies
+        run: npm install
 
       - name: Prepare web assets
         run: |
@@ -51,6 +51,10 @@ jobs:
             }
           }
           EOF
+
+      - name: Install Android SDK components
+        run: |
+          sdkmanager "platforms;android-35" "build-tools;35.0.0"
 
       - name: Add Android platform
         run: npx cap add android
